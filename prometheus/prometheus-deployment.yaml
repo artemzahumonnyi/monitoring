@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-az
+  labels:
+    app: prometheus-az
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: 
+      app: prometheus-az
+  template:
+    metadata:
+      labels:
+        app: prometheus-az
+    spec:
+      nodeSelector:
+        role: prometheus
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        args:
+          - --storage.tsdb.retention.time=3d
+          - --config.file=/etc/prometheus/prometheus.yml
+          - --storage.tsdb.min-block-duration=30m
+        image: docker.io/prom/prometheus:v2.20.1
+        volumeMounts:
+          - name: prometheus-config-volume
+            mountPath: /etc/prometheus
+          - name: prometheus-data
+            mountPath: /prometheus
+        ports:
+        - containerPort: 9090
+        resources:
+          limits:
+            memory: 3500Mi
+            cpu: 1250m
+          requests:
+            memory: 500Mi
+            cpu: 250m
+      volumes:
+        - name: prometheus-config-volume
+          configMap:
+            defaultMode: 420
+            name: prometheus-az
+        - name: prometheus-data
+          persistentVolumeClaim:
+            claimName: prometheus-ebs

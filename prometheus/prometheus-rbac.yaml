@@ -1,0 +1,39 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: prometheus-autocode
+rules:
+- apiGroups: [""]
+  resources:
+  - services
+  - endpoints
+  - pods
+  - nodes
+  - nodes/proxy
+  - nodes/metrics
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-autocode
+  namespace: autocode-edp-cicd
+---  
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus-autocode
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus-autocode
+subjects:
+- kind: ServiceAccount
+  name: prometheus-autocode
+  namespace: autocode-edp-cicd

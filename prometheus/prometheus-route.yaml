@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Route
+metadata:
+  name: "prometheus-route"
+  labels:
+    app: "prometheus-az"
+spec:
+  host: prometheus-new.demo.edp-epam.com
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  path: ""
+  to:
+    kind: Service
+    name: "prometheus-service-az"
+  wildcardPolicy: None
